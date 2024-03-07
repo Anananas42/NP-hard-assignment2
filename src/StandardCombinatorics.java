@@ -10,6 +10,10 @@ public class StandardCombinatorics {
         List<Solver.Constraint> constraints = new ArrayList<>();
 
         // TODO: add your variables
+        for (int i = 0; i < n; i++) {
+            Solver.Variable variable = new Solver.Variable(Arrays.asList(0, 1));
+            variables.add(variable);
+        }
 
         // TODO: add your constraints
 
@@ -24,7 +28,18 @@ public class StandardCombinatorics {
         List<int[]> result = solver.findAllSolutions();
 
         // TODO: use result to construct answer
-        return new ArrayList<>();
+        List<String> strings = new ArrayList<>();
+        for (int[] arr : result) {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i : arr) {
+                sb.append(i);
+            }
+
+            strings.add(sb.toString());
+        }
+
+        return strings;
     }
 
     /**
@@ -37,7 +52,18 @@ public class StandardCombinatorics {
 
         // TODO: add your variables
 
+        for(int i = 0; i < k; i++) {
+            List<Integer> domain = new ArrayList<>();
+            for (int j = 1; j <= n; j++) {
+                domain.add(j);
+            }
+            Solver.Variable variable = new Solver.Variable(domain);
+            variables.add(variable);
+        }
+
+
         // TODO: add your constraints
+
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
