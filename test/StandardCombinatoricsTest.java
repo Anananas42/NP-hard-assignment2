@@ -3,7 +3,9 @@ import org.opentest4j.AssertionFailedError;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -277,6 +279,41 @@ class StandardCombinatoricsTest {
             }
 
             System.out.println(" passed in " + time + "ms");
+        }
+    }
+
+    private static String joinArray(int[] arr) {
+        Arrays.sort(arr);
+        StringBuilder sb = new StringBuilder();
+        for (int i : arr) {
+            sb.append(i);
+            sb.append(",");
+        }
+        return sb.toString();
+    }
+
+    @Test
+    public void weblabSubsetTest() {
+        int n = 20;
+        Set<String> seenStrings = new HashSet<>();
+
+        List<int[]> result = StandardCombinatorics.getSubsets(n);
+        assertNotNull(result);
+        assertEquals(result.size(), (int) Math.pow(2, n));
+
+        for (int[] res : result) {
+            // Enforce unique values
+            Set<Integer> seenInts = new HashSet<>();
+            for (int i : res) {
+                assertTrue(i >= 1);
+                assertTrue(i <= n);
+                assertFalse(seenInts.contains(i));
+                seenInts.add(i);
+            }
+
+            String resStr = joinArray(res);
+            assertFalse(seenStrings.contains(resStr));
+            seenStrings.add(resStr);
         }
     }
 }
