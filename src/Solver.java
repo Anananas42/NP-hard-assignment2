@@ -1,11 +1,10 @@
 import java.util.*;
 
 public class Solver {
-    // Workaround around the annoying template (it will probably also be on weblab...)
     static int fixedPoint;
     static Variable[] variables;
     static Constraint[] constraints;
-    static List<int[]> solutions;
+    static LinkedList<int[]> solutions;
 
     static class VariableAssignment {
         public int fixedPointId;
@@ -65,10 +64,13 @@ public class Solver {
         abstract boolean infer(int varId);
     }
 
-    public static class NeqConstraint extends Constraint {
+    // Not equal with offset
+    public static class NeqOffsetConstraint extends Constraint {
+        int offset;
 
-        public NeqConstraint(int id1, int id2) {
+        public NeqOffsetConstraint(int id1, int id2, int offset) {
             this.varIds = new Integer[] { id1, id2 };
+            this.offset = offset;
         }
 
         @Override
@@ -84,11 +86,12 @@ public class Solver {
             Variable currVar = variables[varId];
             Variable otherVar = variables[otherId];
 
-            Integer valToRemove = currVar.assignment.value;
-            List<Integer> domain = otherVar.propagations.peek();
+            Integer valToRemove = currVar.assignment.value + offset;
 
             // If other variable assigned to the value that is being removed, no solution possible
             if (otherVar.assignment != null) return otherVar.assignment.value != valToRemove;
+
+            List<Integer> domain = otherVar.propagations.peek();
             
             if (domain.contains(valToRemove)) {
                 domain.remove(valToRemove);
@@ -109,6 +112,13 @@ public class Solver {
             }
 
             return true;
+        }
+    }
+
+    // Specialized case of NeqOffset with offset 0
+    public static class NeqConstraint extends NeqOffsetConstraint {
+        public NeqConstraint(int id1, int id2) {
+            super(id1, id2, 0);
         }
     }
 
@@ -136,13 +146,14 @@ public class Solver {
             Variable otherVar = variables[otherId];
 
             Integer currValue = currVar.assignment.value;
-            List<Integer> domain = otherVar.propagations.peek();
 
             // Other variable assigned to the value that is being removed, no solution possible
             if (otherVar.assignment != null) {
                 if (otherIsLhs) return otherVar.assignment.value >= currValue;
                 return currValue >= otherVar.assignment.value;
             }
+
+            List<Integer> domain = otherVar.propagations.peek();
 
             // Filter values to be removed
             List<Integer> valsToRemove = new ArrayList<>();
@@ -200,13 +211,14 @@ public class Solver {
             Variable otherVar = variables[otherId];
 
             Integer currValue = currVar.assignment.value;
-            List<Integer> domain = otherVar.propagations.peek();
 
             // Other variable assigned to the value that is being removed, no solution possible
             if (otherVar.assignment != null) {
                 if (otherIsLhs) return otherVar.assignment.value > currValue;
                 return currValue > otherVar.assignment.value;
             }
+
+            List<Integer> domain = otherVar.propagations.peek();
 
             // Filter values to be removed
             List<Integer> valsToRemove = new ArrayList<>();

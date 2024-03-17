@@ -1,5 +1,4 @@
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class StandardCombinatorics {
     /**
@@ -10,12 +9,9 @@ public class StandardCombinatorics {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
         for (int i = 0; i < n; i++) {
             variables.add(new Solver.Variable(List.of(0, 1)));
         }
-
-        // TODO: add your constraints
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -25,14 +21,22 @@ public class StandardCombinatorics {
 
         // Use solver
         Solver solver = new Solver(variablesArray, constraintsArray);
-        List<int[]> result = solver.findAllSolutions();
+        List<int[]> results = solver.findAllSolutions();
 
-        // TODO: use result to construct answer
-        List<String> resultStrings = result.stream()
-                                        .map(arr -> Arrays.stream(arr)
-                                            .mapToObj(String::valueOf)
-                                            .collect(Collectors.joining()))
-                                        .collect(Collectors.toList());
+        // List<String> resultStrings = result.stream()
+        //                                 .map(arr -> Arrays.stream(arr)
+        //                                     .mapToObj(String::valueOf)
+        //                                     .collect(Collectors.joining()))
+        //                                 .collect(Collectors.toList());
+
+        List<String> resultStrings = new ArrayList<String>();
+        for (int[] result : results) {
+            StringBuilder binaryString = new StringBuilder();
+            for (int bit : result) {
+                binaryString.append(String.valueOf(bit)); // Convert each integer to a String and append it
+            }
+            resultStrings.add(binaryString.toString()); // Add the resulting binary string to the list
+        }
         return resultStrings;
     }
 
@@ -115,10 +119,8 @@ public class StandardCombinatorics {
     public static List<int[]> getSubsets(int n) {
 
         List<int[]> result = new ArrayList<>();
-        int[] emptySet = new int[0];
-        result.add(emptySet);
 
-        for (int k = 0; k < n; k++) {
+        for (int k = 0; k <= n; k++) {
             result.addAll(getCombinationsWithoutRepetition(n, k));
         }
 
