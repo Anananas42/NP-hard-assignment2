@@ -117,14 +117,42 @@ public class StandardCombinatorics {
      * Returns a list of all subsets in the set {1,...,n}
      */
     public static List<int[]> getSubsets(int n) {
+        // Initialize lists for variables and constraints
+        List<Solver.Variable> variables = new ArrayList<>();
+        List<Solver.Constraint> constraints = new ArrayList<>();
 
-        List<int[]> result = new ArrayList<>();
+        List<Integer> domain = List.of(0, 1);
 
-        for (int k = 0; k <= n; k++) {
-            result.addAll(getCombinationsWithoutRepetition(n, k));
+        for (int i = 0; i < n; i++){
+            variables.add(new Solver.Variable(domain));
         }
 
-        return result;
+        // Convert to arrays
+        Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
+        variablesArray = variables.toArray(variablesArray);
+        Solver.Constraint[] constraintsArray = new Solver.Constraint[constraints.size()];
+        constraintsArray = constraints.toArray(constraintsArray);
+
+        // Use solver
+        Solver solver = new Solver(variablesArray, constraintsArray);
+        List<int[]> result = solver.findAllSolutions();
+
+        List<int[]> solutions = new ArrayList<>();
+        
+        for (int[] solutionUnfiltered : result) {
+            List<Integer> filteredSolution = new ArrayList<>();
+            for (int i = 0; i < solutionUnfiltered.length; i++) {
+                if (solutionUnfiltered[i] == 0) continue;
+                filteredSolution.add(i+1);
+            }
+            int[] filteredSolutionArray = new int[filteredSolution.size()];
+            for (int i = 0; i < filteredSolutionArray.length; i++) {
+                filteredSolutionArray[i] = filteredSolution.get(i);
+            }
+            solutions.add(filteredSolutionArray);
+        }
+
+        return solutions;
     }
 
     /**
