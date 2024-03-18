@@ -276,8 +276,10 @@ public class Solver {
             Solver.variables[i] = variables[i];
             Solver.variables[i].id = i;
 //            Solver.variables[i].assignment = null;
-            Solver.variables[i].propagations = new ArrayDeque<>();
-            Solver.variables[i].propagations.push(new ArrayList<>(Solver.variables[i].defaultDomain));
+            if (Solver.variables[i].assignment == null) {
+                Solver.variables[i].propagations = new ArrayDeque<>();
+                Solver.variables[i].propagations.push(new ArrayList<>(Solver.variables[i].defaultDomain));
+            }
         }
 
         Solver.constraints = new Constraint[constraints.length];
@@ -287,6 +289,7 @@ public class Solver {
         }
 
         for (Variable var : Solver.variables) {
+            if (var.constraintIds != null || var.assignment != null) continue;
             List<Constraint> varConstraints = new ArrayList<>();
             for (Constraint constr : Solver.constraints) {
                 // Add constraint to variable's list if the constraint affects the variable
@@ -332,35 +335,38 @@ public class Solver {
      */
     void solve(boolean findAllSolutions) {
         // here you can do any preprocessing you might want to do before diving into the search
+        PriorityQueue<Integer> unassigned = new PriorityQueue<Integer>(Comparator.comparing(a -> {
+            return variables[a].propagations.peek().size();
+        }));
 
-        search(findAllSolutions /* you can add more params */);
+        for(int i = 0; i < variables.length; i++) {
+            if(variables[i].propagations!=null && !variables[i].propagations.isEmpty()) unassigned.add(i);
+        }
+
+        search(findAllSolutions, unassigned);
     }
 
     /**
      * Solves the problem using search and inference.
      */
-    void search(boolean findAllSolutions /* you can add more params */) {
+    void search(boolean findAllSolutions, PriorityQueue<Integer> unassigned) {
         
         // if not findAllSolutions and solutions not empty, return
         if (!findAllSolutions && !Solver.solutions.isEmpty()) return;
 
-        // Find unassigned variable
-        Variable unassignedVar = null;
-        for (Variable var : Solver.variables) {
-            if (var.assignment != null) continue;
-            unassignedVar = var;
-            break;
-        }
-
-        // If all variables assigned, solution found
-        if (unassignedVar == null) {
+        if (unassigned.isEmpty()) {
             int[] solution = new int[Solver.variables.length];
             for (int i = 0; i < Solver.variables.length; i++) {
                 solution[i] = Solver.variables[i].assignment.value;
-            }   
+            }
             Solver.solutions.add(solution);
             return;
         }
+
+        int currIndex = unassigned.peek();
+        Variable unassignedVar = variables[currIndex];
+
+        unassigned.poll();
 
         // Try all possible assignments
         for (Integer val : unassignedVar.propagations.peek()) {
@@ -370,8 +376,9 @@ public class Solver {
             boolean isSolutionStillPossible = true;
 
             // Add new propagation domains (copy last)
-            for (Variable variable : Solver.variables) {
-                if (variable.assignment==null) variable.propagations.push(new ArrayList<>(variable.propagations.peek()));
+            for (int index : unassigned) {
+                Variable variable = variables[index];
+                variable.propagations.push(new ArrayList<>(variable.propagations.peek()));
             }
 
             // Perform an assignment and propagation pass 
@@ -386,22 +393,22 @@ public class Solver {
             
             // if solution is possible
                 // Call this method recursively with updated assignment and propagations
-            
-            if (isSolutionStillPossible) search(findAllSolutions);
+
+            if (isSolutionStillPossible) search(findAllSolutions, unassigned);
+            if (!findAllSolutions && !Solver.solutions.isEmpty()) break;
 
             // Pop assignment and propagation
-            for (Variable popVariable : Solver.variables) {
+            for (int index : unassigned) {
+                Variable popVariable = variables[index];
+                popVariable.propagations.pop();
                 if (popVariable.assignment != null && popVariable.assignment.fixedPointId == currFixedPoint) {
                     popVariable.assignment = null;
                 }
-
-                if (popVariable.assignment == null || (popVariable.assignment != null && popVariable.assignment.fixedPointId == currFixedPoint)) {
-                    popVariable.propagations.pop();
-                }
-
             }
-
+            unassignedVar.assignment = null;
         }
+
+        unassigned.add(currIndex);
 
     }
 }

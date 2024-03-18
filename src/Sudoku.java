@@ -127,6 +127,7 @@ public class Sudoku {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
         int squareSide = (int)Math.sqrt(grid.length);
+        int constraintCnt = 0;
 
         // add your variables and constraints
         for(int i = 0; i < grid.length; i++) {
@@ -137,11 +138,20 @@ public class Sudoku {
                     for (int n = 1; n <= grid.length; n++) {
                         domain.add(n);
                     }
-                    variables.add(new Solver.Variable(domain));
+
+                    Solver.Variable variable = new Solver.Variable(domain);
+                    variables.add(variable);
+                    List<Integer> constraintIndice = new ArrayList<>();
 
                     for (int n = 0; n < grid.length; n++) {
-                        if (i != n) constraints.add(new Solver.NeqConstraint(i * grid.length + j, n * grid.length + j));
-                        if (j != n) constraints.add(new Solver.NeqConstraint(i * grid.length + j, i * grid.length + n));
+                        if (i != n) {
+                            constraints.add(new Solver.NeqConstraint(i * grid.length + j, n * grid.length + j));
+                            constraintIndice.add(constraintCnt++);
+                        }
+                        if (j != n) {
+                            constraints.add(new Solver.NeqConstraint(i * grid.length + j, i * grid.length + n));
+                            constraintIndice.add(constraintCnt++);
+                        }
 
                         int squareXLeft = i - i % squareSide;
                         int squareXRight = squareXLeft + squareSide - 1;
@@ -152,9 +162,11 @@ public class Sudoku {
                             for (int y = squareYLeft; y <= squareYRight; y ++) {
                                 if (x == i && y == j) continue;
                                 constraints.add(new Solver.NeqConstraint(i * grid.length + j, x * grid.length + y));
+                                constraintIndice.add(constraintCnt++);
                             }
                         }
                     }
+                    variable.constraintIds = constraintIndice.stream().mapToInt(Integer::intValue).toArray();
                 }
             }
         }
