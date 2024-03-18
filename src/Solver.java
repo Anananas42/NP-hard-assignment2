@@ -365,7 +365,7 @@ public class Solver {
 
             // Add new propagation domains (copy last)
             for (Variable variable : Solver.variables) {
-                variable.propagations.push(new ArrayList<>(variable.propagations.peek()));
+                if (variable.assignment==null) variable.propagations.push(new ArrayList<>(variable.propagations.peek()));
             }
 
             // Perform an assignment and propagation pass 
@@ -388,7 +388,11 @@ public class Solver {
                 if (popVariable.assignment != null && popVariable.assignment.fixedPointId == currFixedPoint) {
                     popVariable.assignment = null;
                 }
-                popVariable.propagations.pop();
+
+                if (popVariable.assignment == null || (popVariable.assignment != null && popVariable.assignment.fixedPointId == currFixedPoint)) {
+                    popVariable.propagations.pop();
+                }
+
             }
 
         }
