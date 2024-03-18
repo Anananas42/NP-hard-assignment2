@@ -39,6 +39,12 @@ public class Solver {
             this.defaultDomain = new ArrayList<>(domain);
         }
 
+        public Variable(int value) {
+            this.defaultDomain = new ArrayList<>();
+            this.assignment = new VariableAssignment(value, -1);
+        }
+
+
         @Override
         public String toString() {
             if (assignment != null) {
@@ -269,7 +275,7 @@ public class Solver {
         for (int i = 0; i < variables.length; i++) {
             Solver.variables[i] = variables[i];
             Solver.variables[i].id = i;
-            Solver.variables[i].assignment = null;
+//            Solver.variables[i].assignment = null;
             Solver.variables[i].propagations = new ArrayDeque<>();
             Solver.variables[i].propagations.push(new ArrayList<>(Solver.variables[i].defaultDomain));
         }
