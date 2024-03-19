@@ -349,8 +349,11 @@ public class Solver {
         Variable unassignedVar = null;
         for (Variable var : Solver.variables) {
             if (var.assignment != null) continue;
-            unassignedVar = var;
-            break;
+            if (unassignedVar == null) {
+                unassignedVar = var;
+            } else {
+                unassignedVar = unassignedVar.propagations.peek().size() < var.propagations.peek().size()? unassignedVar : var;
+            }
         }
 
         // If all variables assigned, solution found
