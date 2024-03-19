@@ -287,6 +287,7 @@ public class Solver {
         }
 
         for (Variable var : Solver.variables) {
+            if (var.constraintIds != null || var.assignment != null) continue;
             List<Constraint> varConstraints = new ArrayList<>();
             for (Constraint constr : Solver.constraints) {
                 // Add constraint to variable's list if the constraint affects the variable
