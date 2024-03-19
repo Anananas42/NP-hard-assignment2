@@ -52,6 +52,16 @@ public class Solver {
             }
             return "[" + this.id + "]: " + propagations.peek().toString();
         }
+
+        // deep copy with new memory allocation
+        public Variable copy() {
+            List<Integer> newDomain = new ArrayList<>();
+            for (int i = 0; i < domain.size(); i++) {
+                newDomain.add(domain.get(i));
+            }
+
+            return new Variable(newDomain);
+        }
     }
 
     // TODO: sort constraints by the number of unassigned variables (less = better)
@@ -263,7 +273,6 @@ public class Solver {
         }
     }
 
-
     /**
      * Constructs a solver.
      * @param variables The variables in the problem
@@ -323,7 +332,7 @@ public class Solver {
      */
     List<int[]> findAllSolutions() {
         solve(true);
-
+//        printSolution();
         return solutions;
     }
 
@@ -406,6 +415,5 @@ public class Solver {
             }
 
         }
-
     }
 }
