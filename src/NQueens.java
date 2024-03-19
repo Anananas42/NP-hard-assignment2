@@ -9,9 +9,32 @@ public class NQueens {
         List<Solver.Variable> variables = new ArrayList<>();
         List<Solver.Constraint> constraints = new ArrayList<>();
 
-        // TODO: add your variables
+        // Restrict the first variable to range [1, ceil(n / 2)] to eliminate some horizontal symmetries
+        List<Integer> domainFirst = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            domainFirst.add(i+1);
+        }
+        variables.add(new Solver.Variable(domainFirst));
 
-        // TODO: add your constraints
+        // Add rest of variables with full range
+        List<Integer> domain = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            domain.add(i+1);
+        }        
+        for (int i = 1; i < n; i++){
+            variables.add(new Solver.Variable(domain));
+        }
+
+        for (int i = 0; i < n; i++) {
+            for (int j = i+1; j < n; j++) {
+                // No column collisions
+                constraints.add(new Solver.NeqConstraint(i, j));
+
+                // No diagonal collisions
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, j-i));
+                constraints.add(new Solver.NeqOffsetConstraint(i, j, i-j));
+            }
+        }
 
         // Convert to arrays
         Solver.Variable[] variablesArray = new Solver.Variable[variables.size()];
@@ -23,7 +46,6 @@ public class NQueens {
         Solver solver = new Solver(variablesArray, constraintsArray);
         List<int[]> result = solver.findAllSolutions();
 
-        // TODO: use result to construct answer
-        return -1;
+        return result.size();
     }
 }
